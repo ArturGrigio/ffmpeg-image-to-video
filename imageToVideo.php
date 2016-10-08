@@ -45,22 +45,24 @@ foreach($morphs as $key=>$morph) {
 }
 
 // Adding Agent Info
-if($line_2 && $line_3)
-    exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. $font+2 .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+1) .' \''.$line_2.'\'" -draw "text 0,'. 3*($font+1) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
-else if($line_2)
-    exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. 2*($font-2) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+8) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
-else
-    exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
-
+if($line_1 || $line_2 || $line_3) {
+    if($line_2 && $line_3) {
+        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. $font+2 .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+1) .' \''.$line_2.'\'" -draw "text 0,'. 3*($font+1) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
+    } else if($line_2) {
+        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. 2*($font-2) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+8) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
+    } else {
+        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
+    }
+}
 
 // Creating the original OUT video
 exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$pathToImg.$out.".mp4");
 
 // Placing the watermark
-if($profile_image) {
+if($profile_image && ($line_1 || $line_2 || $line_3)) {
     exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=92:main_h-92" -strict -2 '.$out.'.mp4');
     $retVid = $out.".mp4";
-} else {
+} else if ($line_1 || $line_2 || $line_3) {
     exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" -strict -2 '.$out.'.mp4');
     $retVid = $out.".mp4";
 }
@@ -74,7 +76,7 @@ if($profile_image) {
 }
 
 // Deleting files
-exec('rm -rf '.$pathToImg);
+//exec('rm -rf '.$pathToImg);
 
 return $retVid;
 ?>
