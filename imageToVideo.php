@@ -1,18 +1,27 @@
 <?php
-$urls = array( "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/001.jpg&w=900&h=600&fill-to-fit=d8d8d8", "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/002.jpg&w=900&h=600&fill-to-fit=d8d8d8", "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/003.jpg&w=900&h=600&fill-to-fit=d8d8d8" );
+$musicUrl = "https://listingzen.com/music/Piano.mp3";
+$urls = array( "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/001.jpg&w=900&h=600&fill-to-fit=d8d8d8", "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/002.jpg&w=900&h=600&fill-to-fit=d8d8d8", "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/003.jpg&w=900&h=600&fill-to-fit=d8d8d8", "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/004.jpg&w=900&h=600&fill-to-fit=d8d8d8" );
+$property = "711 E. ";
 
-$pathToImg = "./images/";
-$pathToMusic = "./music/";
-$music = "jass.mp3";
-$agent_name = "artur grigio";
+$agent_name = "Artur Grigio";
 $agent_phone = "(626) 555-1234";
 $agent_email = "test@yahoo.com";
-$font = 15;
 
+$out = preg_replace('/[^a-zA-Z0-9.\']/', '_', $property);
+$out = substr(str_replace(["'", " ", "."], '', $out),0, 20)."-".time()%1000000;
+$pathToImg = $out."/";
+
+$font = 15; // Font Size (Can't change without changing the Watermark Image Size
 $transition = 1; // In Seconds
 $holdFrame = 2; // Hold the frame in Seconds
 $fps = 30; // Frames per second
 
+// Creating the folder
+mkdir("./$pathToImg");
+
+// Downloading the Music File
+file_put_contents($pathToImg."music.mp3", fopen($musicUrl, 'r'));
+// Downloading the Images
 foreach ($urls as $key=>$url) {
     file_put_contents($pathToImg.$key.".jpg", fopen($url, 'r'));
 }
@@ -33,22 +42,20 @@ foreach($morphs as $key=>$morph) {
 
 // Adding Agent Info
 if($agent_phone && $agent_email)
-    exec('convert -size 300x80 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" -draw "text 0,'. 3*($font+1) .' \'E-Mail: '.$agent_email.'\'" watermarkfile.png');
+    exec('convert -size 300x82 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" -draw "text 0,'. 3*($font+1) .' \'E-Mail: '.$agent_email.'\'" '.$pathToImg.'watermarkfile.jpg');
 else if($agent_phone)
-    exec('convert -size 300x80 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" watermarkfile.png');
+    exec('convert -size 300x65 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" '.$pathToImg.'watermarkfile.jpg');
 else
-    exec('convert -size 300x80 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" watermarkfile.png');
+    exec('convert -size 300x40 xc:white -font Arial -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$agent_name.'\'" '.$pathToImg.'watermarkfile.jpg');
 
 
 // Creating the original OUT video
-exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToMusic.$music." -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -c:v mpeg4 out.mp4");
+exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 ".$pathToImg.$out.".mp4");
 
 // Placing the watermark
-exec('ffmpeg -i out.mp4 -i watermarkfile.png -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" finished.mp4');
+exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.jpg -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" '.$out.'.mp4');
 
 // Deleting files
-exec("rm $pathToImg"."0*.jpg");
-exec('rm ./watermarkfile.png');
-exec('rm ./out.mp4');
+exec('rm -rf ./'.$pathToImg);
 
 ?>
