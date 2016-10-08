@@ -1,8 +1,8 @@
 <?php
-$musicUrl = "https://listingzen.com/music/Piano.mp3";
+$musicUrl = htmlspecialchars($_POST["musicUrl"]);
 $urls = array( "/prop0/001.jpg", "/prop2/prop2-006.jpg", "/prop4657/4337MarinaCityDrPH43Reshoot-001.jpg" );
-$profile_image = "/agent2/agent1469316620.jpg";
-$property = "711 E. Windsor Rd. ";
+$profile_image = htmlspecialchars($_POST["profile_image"]);
+$property = htmlspecialchars($_POST["property"]);
 $line_1 = htmlspecialchars($_POST["line_1"]);
 $line_2 = htmlspecialchars($_POST["line_2"]);
 $line_3 = htmlspecialchars($_POST["line_3"]);
@@ -47,11 +47,11 @@ foreach($morphs as $key=>$morph) {
 // Adding Agent Info
 if($line_1 || $line_2 || $line_3) {
     if($line_2 && $line_3) {
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. $font+2 .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+1) .' \''.$line_2.'\'" -draw "text 0,'. 3*($font+1) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
+        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font+3) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+2) .' \''.$line_2.'\'" -draw "text 0,'. 3*($font+2) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
     } else if($line_2) {
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. 2*($font-2) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+8) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
+        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. 2*($font-2) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+8) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
     } else {
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
+        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
     }
 }
 
@@ -76,7 +76,7 @@ if($profile_image) {
 }
 
 // Deleting files
-//exec('rm -rf '.$pathToImg);
+exec('rm -rf '.$pathToImg);
 
 return $retVid;
 ?>
