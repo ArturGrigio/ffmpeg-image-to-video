@@ -24,6 +24,6 @@
     exec("rm $pathToImg*$postfix.jpg");
 
     exec('convert -size 500x500 xc:none -font Arial -pointsize 20 -gravity NorthWest -draw "text 0,0 \'Artur Grigio\'" -draw "text 0,24 \'test\'" watermarkfile.png');
-    exec('ffmpeg -i out.mp4 -i watermarkfile.png -filter_complex "overlay=10:15" birds1.mp4')
+    exec('ffmpeg -i out.mp4 -i watermarkfile.png -filter_complex "overlay=10:15" finished.mp4')
 
 ?>
