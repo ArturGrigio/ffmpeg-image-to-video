@@ -42,18 +42,18 @@ foreach($morphs as $key=>$morph) {
 
 // Adding Agent Info
 if($agent_phone && $agent_email)
-    exec('convert -size 300x82 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" -draw "text 0,'. 3*($font+1) .' \'E-Mail: '.$agent_email.'\'" '.$pathToImg.'watermarkfile.jpg');
+    exec('convert -size 300x82 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" -draw "text 0,'. 3*($font+1) .' \'E-Mail: '.$agent_email.'\'" '.$pathToImg.'watermarkfile.png');
 else if($agent_phone)
-    exec('convert -size 300x65 xc:white -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" '.$pathToImg.'watermarkfile.jpg');
+    exec('convert -size 300x65 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity North -draw "text 0,'. $font .' \''.$agent_name.'\'" -draw "text 0,'. 2*($font+1) .' \'Phone: '.$agent_phone.'\'" '.$pathToImg.'watermarkfile.png');
 else
-    exec('convert -size 300x40 xc:white -font Arial -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$agent_name.'\'" '.$pathToImg.'watermarkfile.jpg');
+    exec('convert -size 300x40 xc:"rgba(255,255,255,0.65)" -font Arial -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$agent_name.'\'" '.$pathToImg.'watermarkfile.png');
 
 
 // Creating the original OUT video
 exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 ".$pathToImg.$out.".mp4");
 
 // Placing the watermark
-exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.jpg -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" '.$out.'.mp4');
+exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" '.$out.'.mp4');
 
 // Deleting files
 exec('rm -rf ./'.$pathToImg);
