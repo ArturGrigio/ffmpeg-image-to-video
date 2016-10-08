@@ -1,4 +1,5 @@
 <?php
+$urls = array( "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/001.jpg&w=900&h=600&fill-to-fit=d8d8d8", "https://shootinglacloud.com/images/ListingZen/mos/cimage/webroot/img.php?src=/prop0/002.jpg&w=900&h=600&fill-to-fit=d8d8d8" );
 
 $pathToImg = "./images/";
 $pathToMusic = "./music/";
@@ -12,6 +13,9 @@ $transition = 1; // In Seconds
 $holdFrame = 2; // Hold the frame in Seconds
 $fps = 30; // Frames per second
 
+foreach ($urls as $key=>$url) {
+    file_put_contents($pathToImg.$key.".jpg", fopen($url, 'r'));
+}
 $images = glob("$pathToImg*.jpg");
 
 exec("convert $pathToImg*.jpg -morph ".$transition*$fps." $pathToImg%07d.jpg");
@@ -30,11 +34,11 @@ foreach($morphs as $key=>$morph) {
 exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToMusic.$music." -t ".count($images)*($transition+$holdFrame)." -c:v mpeg4 out.mp4");
 // Adding Agent Info
 if($agent_phone && $agent_email)
-    exec('convert -size 500x500 xc:none -font Arial -pointsize '. $font .' -gravity NorthWest -draw "text 0,0 \''.$agent_name.'\'" -draw "text 0,'. ($font+1) .' \'Phone: '.$agent_phone.'\'" -draw "text 0,'. 2*($font+1) .' \'E-Mail: '.$agent_email.'\'" watermarkfile.png');
+    exec('convert -size 900x600 xc:none -font Arial -pointsize '. $font .' -gravity NorthWest -draw "text 0,0 \''.$agent_name.'\'" -draw "text 0,'. ($font+1) .' \'Phone: '.$agent_phone.'\'" -draw "text 0,'. 2*($font+1) .' \'E-Mail: '.$agent_email.'\'" watermarkfile.png');
 else if($agent_phone)
-    exec('convert -size 500x500 xc:none -font Arial -pointsize '. $font .' -gravity NorthWest -draw "text 0,0 \''.$agent_name.'\'" -draw "text 0,'. ($font+1) .' \'Phone: '.$agent_phone.'\'" watermarkfile.png');
+    exec('convert -size 900x600 xc:none -font Arial -pointsize '. $font .' -gravity NorthWest -draw "text 0,0 \''.$agent_name.'\'" -draw "text 0,'. ($font+1) .' \'Phone: '.$agent_phone.'\'" watermarkfile.png');
 else
-    exec('convert -size 500x500 xc:none -font Arial -pointsize '. $font .' -gravity NorthWest -draw "text 0,0 \''.$agent_name.'\'" watermarkfile.png');
+    exec('convert -size 900x600 xc:none -font Arial -pointsize '. $font .' -gravity NorthWest -draw "text 0,0 \''.$agent_name.'\'" watermarkfile.png');
 
 // Placing the watermark
 exec('ffmpeg -i out.mp4 -i watermarkfile.png -filter_complex "overlay=7:7" finished.mp4');
