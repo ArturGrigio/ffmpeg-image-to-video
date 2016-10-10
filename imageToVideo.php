@@ -1,8 +1,8 @@
 <?php
 $musicUrl = htmlspecialchars($_POST["musicUrl"]);
-$urls = array( "/prop0/001.jpg", "/prop2/prop2-006.jpg", "/prop4657/4337MarinaCityDrPH43Reshoot-001.jpg" );
-$profile_image = htmlspecialchars($_POST["profile_image"]);
-$property = htmlspecialchars($_POST["property"]);
+$urls = ["/prop0/001.jpg"]; // htmlspecialchars($_POST["images"]);
+$profile_image =  // htmlspecialchars($_POST["profile_image"]);
+$property = "test"; //htmlspecialchars($_POST["property"]);
 $line_1 = htmlspecialchars($_POST["line_1"]);
 $line_2 = htmlspecialchars($_POST["line_2"]);
 $line_3 = htmlspecialchars($_POST["line_3"]);
@@ -21,7 +21,8 @@ $fps = 30; // Frames per second
 exec('mkdir '.$pathToImg.'/');
 
 // Downloading the Music File
-exec('wget  -O '.$pathToImg.'/music.mp3 '.$musicUrl);
+if($musicUrl)
+    exec('wget  -O '.$pathToImg.'/music.mp3 '.$musicUrl);
 
 // Copying the Images
 foreach ($urls as $key=>$url) {
@@ -56,14 +57,20 @@ if($line_1 || $line_2 || $line_3) {
 }
 
 // Creating the original OUT video
-exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$pathToImg.$out.".mp4");
+if($musicUrl) {
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    $retVid = $out.".mp4";
+} else {
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    $retVid = $out.".mp4";
+}
 
 // Placing the watermark
 if($profile_image && ($line_1 || $line_2 || $line_3)) {
-    exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=92:main_h-92" -strict -2 '.$out.'.mp4');
+    exec('ffmpeg -i '.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=92:main_h-92" -strict -2 '.$out.'.mp4');
     $retVid = $out.".mp4";
 } else if ($line_1 || $line_2 || $line_3) {
-    exec('ffmpeg -i '.$pathToImg.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" -strict -2 '.$out.'.mp4');
+    exec('ffmpeg -i '.$out.'.mp4 -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" -strict -2 '.$out.'.mp4');
     $retVid = $out.".mp4";
 }
 // Downloading The Agent Image
@@ -71,7 +78,7 @@ if($profile_image) {
     $profile = $pathToImg . basename($profile_image);
     exec('cp '.$pathToLZ.$profile_image.' '.$profile);
     exec('convert ' . $profile . ' -resize 85x85 -background black -gravity center -extent 85x85 ' . $profile);
-    exec('ffmpeg -i ' . $out . '.mp4 -i ' . $profile . ' -filter_complex "overlay=7:main_h-overlay_h-7" -strict -2 '.$out.'2.mp4');
+    exec('ffmpeg -i ' . $out . '.mp4 -i ' . $profile . ' -filter_complex "overlay=7:main_h-overlay_h-7" -strict -2 '.$out.'.mp4');
     $retVid = $out."2.mp4";
 }
 
