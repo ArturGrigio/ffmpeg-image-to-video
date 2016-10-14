@@ -34,7 +34,7 @@ foreach ($urls as $key=>$url) {
     printf("Downloaded Image: %s\n", $url);
     $file = $pathToImg.basename($url);
     exec('cp '.$pathToLZ.$url." ".$file);
-    exec('convert '.$file.' -resize 900x600 -background black -gravity center -extent 900x600 '.$file);
+    exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
 }
 $images = glob($pathToImg."*.jpg");
 
@@ -43,6 +43,7 @@ exec("convert $pathToImg*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%0
 $morphs = glob($pathToImg."morph-*.jpg");
 
 $counter = 0;
+$lastImage = "";
 foreach($morphs as $key=>$morph) {
     if($key % ($transition*$fps+1) == 0) {
         printf("Created 30 copies of: %s\n", $morph);
@@ -55,19 +56,28 @@ foreach($morphs as $key=>$morph) {
 }
 
 // Adding Agent Info
-if($line_1 || $line_2 || $line_3) {
-    if($line_2 && $line_3) {
-        printf("Created Overlay Image.\n");
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font/2+4) .' \''.$line_1.'\'" -draw "text 0,'. ($font+$font/2+8) .' \''.$line_2.'\'" -draw "text 0,'. (2*$font+$font/2+12) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
-    } else if($line_2) {
-        printf("Created Overlay Image.\n");
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font+4) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+4) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
-    } else {
-        printf("Created Overlay Image.\n");
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
-    }
-}
+//if($line_1 || $line_2 || $line_3) {
+//    if($line_2 && $line_3) {
+//        printf("Created Overlay Image.\n");
+//        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font/2+4) .' \''.$line_1.'\'" -draw "text 0,'. ($font+$font/2+8) .' \''.$line_2.'\'" -draw "text 0,'. (2*$font+$font/2+12) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
+//    } else if($line_2) {
+//        printf("Created Overlay Image.\n");
+//        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font+4) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+4) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
+//    } else {
+//        printf("Created Overlay Image.\n");
+//        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
+//    }
+//}
 
+if($profile_image) {
+    printf("Downloading the agent Image: %s\n", $profile_image);
+    $profile = $pathToImg . basename($profile_image);
+    exec('cp '.$pathToLZ.$profile_image.' '.$profile);
+    exec('convert ' . $profile . ' -resize 85 -background none -gravity center -extent 85x85 '.$pathToImg.'profile.png');
+    exec('convert '.$pathToImg.'profile.png -gravity North -background none -extent 500x400 00000000.png');
+}
+exec('convert '.$profile.' -resize 85 -background none -gravity center -extent 85x85 '.$pathToImg.'profile.png');
+exec('convert -size 600x400 xc:"rgba(255,255,255,0)" -font Helvetica -pointsiz '.$font.' -gravity North');
 // Creating the original OUT video
 if($musicUrl) {
     printf("Created Original video with Music: %s\n", $musicUrl);
@@ -91,15 +101,15 @@ if($profile_image && ($line_1 || $line_2 || $line_3)) {
 }
 
 // Downloading The Agent Image
-if($profile_image) {
-    printf("Downloading the agent Image: %s\n", $profile_image);
-    $profile = $pathToImg . basename($profile_image);
-    exec('cp '.$pathToLZ.$profile_image.' '.$profile);
-    exec('convert ' . $profile . ' -resize 85 -background none -gravity center -extent 85x85 '.$pathToImg.'profile.png');
-    printf("Putting Agent Image on video\n");
-    exec('ffmpeg -y -i '.$retVid.' -i '.$pathToImg.'profile.png -filter_complex "overlay=7:main_h-overlay_h-7" -strict -2 '.$out.'-pwm.mp4');
-    $retVid = $out."-pwm.mp4";
-}
+//if($profile_image) {
+//    printf("Downloading the agent Image: %s\n", $profile_image);
+//    $profile = $pathToImg . basename($profile_image);
+//    exec('cp '.$pathToLZ.$profile_image.' '.$profile);
+//    exec('convert ' . $profile . ' -resize 85 -background none -gravity center -extent 85x85 '.$pathToImg.'profile.png');
+//    printf("Putting Agent Image on video\n");
+//    exec('ffmpeg -y -i '.$retVid.' -i '.$pathToImg.'profile.png -filter_complex "overlay=7:main_h-overlay_h-7" -strict -2 '.$out.'-pwm.mp4');
+//    $retVid = $out."-pwm.mp4";
+//}
 
 // Deleting files
 printf("Deleting the temp folder: %s\n", $pathToImg);
