@@ -64,47 +64,28 @@ if($profile_image) {
             $profile = $pathToImg . basename($profile_image);
             exec('cp '.$pathToLZ.$profile_image.' '.$profile);
             exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
-            $firstImage = glob($pathToImg."00000000*");
-            exec('convert -size 600x400 -composite '.$firstImage[0].' '.$pathToImg.'profile.png -geometry +240+30 -depth 8 '.$pathToImg.'00000000.png');
 }
 
 // Creating the Lines
 $lines = "";
 if ($line_1)
-        $lines .= " -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 100,155,500,185' -fill black -gravity North -annotate +0+163 '$line_1' ";
+        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+163 '$line_1' ";
 if ($line_2)
-        $lines .= " -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 100,186,500,215' -fill black -gravity North -annotate +0+193 '$line_2' ";
+        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+193 '$line_2' ";
 if ($line_3)
-        $lines .= " -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 100,216,500,245' -fill black -gravity North -annotate +0+223 '$line_3' ";
-$lines .= " -pointsize 20 -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 50,260,550,350' -fill black -gravity center -annotate +0+107 '$property' ";
+    $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+223 '$line_3' ";
+$lines = " -pointsize 20 -fill 'rgba(255,255,255,0.55)' -draw 'rectangle 10,10,590,390' -fill 'rgba(0,0,0,0.95)' -gravity center -annotate +0+107 '$property' ".$lines;
 
 // Creating the watermark.png
 exec("convert -size 600x400 xc:'rgba(0,0,0,0)' -pointsize 18 -font Helvetica $lines ".$pathToImg."watermark.png");
 
 // Creating the first Image
 exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."watermark.png -depth 8 ".$pathToImg."00000000.png");
+exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$pathToImg."00000000.png");
 
 // Creating the last Image
 exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
 exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
-
-/*
-printf($lastImage);
-// Adding Agent Info
-if($line_1 || $line_2 || $line_3) {
-    if($line_2 && $line_3) {
-        printf("Created Overlay Image.\n");
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font/2+4) .' \''.$line_1.'\'" -draw "text 0,'. ($font+$font/2+8) .' \''.$line_2.'\'" -draw "text 0,'. (2*$font+$font/2+12) .' \''.$line_3.'\'" '.$pathToImg.'watermarkfile.png');
-    } else if($line_2) {
-        printf("Created Overlay Image.\n");
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity North -draw "text 0,'. ($font+4) .' \''.$line_1.'\'" -draw "text 0,'. 2*($font+4) .' \''.$line_2.'\'" '.$pathToImg.'watermarkfile.png');
-    } else {
-        printf("Created Overlay Image.\n");
-        exec('convert -size 300x85 xc:"rgba(255,255,255,0.65)" -font Helvetica -pointsize '. $font .' -gravity Center -draw "text 0,0 \''.$line_1.'\'" '.$pathToImg.'watermarkfile.png');
-    }
-}
- */ 
-// Creating the original OUT video
 
 if($musicUrl) {
     printf("Created Original video with Music: %s\n", $musicUrl);
@@ -115,34 +96,10 @@ if($musicUrl) {
     exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
     $retVid = $out.".mp4";
 }
-/*
-// Placing the watermark
-if($profile_image && ($line_1 || $line_2 || $line_3)) {
-    printf("Placed the WaterMark image with Profile Picture.\n");
-    exec('ffmpeg -y -i '.$retVid.' -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=92:main_h-92" -strict -2 '.$out.'-wm.mp4');
-    $retVid = $out."-wm.mp4";
-} else if ($line_1 || $line_2 || $line_3) {
-    printf("Placed the WaterMark image.\n");
-    exec('ffmpeg -y -i '.$retVid.' -i '.$pathToImg.'watermarkfile.png -filter_complex "overlay=(main_w-overlay_w)-7:main_h-overlay_h-7" -strict -2 '.$out.'-wm.mp4');
-    $retVid = $out."-wm.mp4";
-}
-
-// Downloading The Agent Image
-if($profile_image) {
-    printf("Downloading the agent Image: %s\n", $profile_image);
-    $profile = $pathToImg . basename($profile_image);
-    exec('cp '.$pathToLZ.$profile_image.' '.$profile);
-    exec('convert ' . $profile . ' -resize 85 -background none -gravity center -extent 85x85 '.$pathToImg.'profile.png');
-    printf("Putting Agent Image on video\n");
-    exec('ffmpeg -y -i '.$retVid.' -i '.$pathToImg.'profile.png -filter_complex "overlay=7:main_h-overlay_h-7" -strict -2 '.$out.'-pwm.mp4');
-    $retVid = $out."-pwm.mp4";
-}
 
 // Deleting files
 printf("Deleting the temp folder: %s\n", $pathToImg);
-//exec('rm -rf '.$pathToImg);
+exec('rm -rf '.$pathToImg);
 
 return $retVid;
-
- */
 ?>
