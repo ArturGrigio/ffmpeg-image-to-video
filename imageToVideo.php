@@ -1,15 +1,14 @@
 <?php
-$musicUrl = htmlspecialchars($_POST["musicUrl"]);
-$urls = json_decode(htmlspecialchars($_POST["images"]));
-$profile_image = htmlspecialchars($_POST["profile_image"]);
-$property = htmlspecialchars($_POST["property"]);
+$musicUrl = (isset($_POST['musicUrl'])) ? htmlspecialchars($_POST["musicUrl"]) : null;
+$urls = json_decode(htmlspecialchars($_POST["urls"]));
+$profile_image = (isset($_POST['profile_image'])) ? htmlspecialchars($_POST["profile_image"]) : null;
+$property = (isset($_POST['property'])) ? htmlspecialchars($_POST["property"]) : "ListingZen Property";
 $line_1 = htmlspecialchars($_POST["line_1"]);
 $line_2 = htmlspecialchars($_POST["line_2"]);
 $line_3 = htmlspecialchars($_POST["line_3"]);
-$fps = htmlspecialchars($_POST['framerate']); // Frames per second
+$fps = (isset($_POST['framerate'])) ? htmlspecialchars($_POST['framerate']) : 20;
 
-function imageToVideo (array $urls, $property,
-                       $fps = 20,
+function imageToVideo (array $urls, $property, $fps,
                        $musicUrl = null,
                        $profile_image = null,
                        $line_1 = null,
@@ -75,6 +74,7 @@ function imageToVideo (array $urls, $property,
 
 // Creating the last Image
     exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
+if($profile_image)
     exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
 
 // Morphing The images
@@ -99,7 +99,9 @@ function imageToVideo (array $urls, $property,
 
 // Creating the first Image
     exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."watermark.png -depth 8 ".$pathToImg."00000000.png");
+if($profile_image)
     exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$pathToImg."00000000.png");
+
     if($musicUrl) {
         printf("Created Original video with Music: %s\n", $musicUrl);
         exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
@@ -112,7 +114,7 @@ function imageToVideo (array $urls, $property,
 
 // Deleting files
     printf("Deleting the temp folder: %s\n", $pathToImg);
-    exec('rm -rf '.$pathToImg);
+    //exec('rm -rf '.$pathToImg);
     return $retVid;
 }
 
