@@ -98,12 +98,17 @@ $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 					line_1: "<?= $line_1 ?>",
 					line_2: "<?= $line_2 ?>",
 					line_3: "<?= $line_3 ?>",
-					fps: "<?= $fps ?>"
-				}
+					fps: "<?= $fps/100 ?>"
+				};
 				console.log(data)
-				$.post('/ffmpeg-image-to-video/imageToVideo.php', data, function(result) {
+
+				$.post('/images/ffmpeg-image-to-video/imageToVideo.php', data, function(result) {
 					console.log(result)
-				})
+					var response = JSON.parse(response)
+					console.log(response)
+				}).error(function(data) {
+					console.log(data)
+				});
 //				$.ajax({
 //					url: '/ffmpeg-image-to-video/imageToVideo.php',
 //					data: data
