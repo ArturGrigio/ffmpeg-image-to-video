@@ -32,60 +32,71 @@ if($musicUrl) {
 // Copying the Images
 foreach ($urls as $key=>$url) {
     printf("Downloaded Image: %s\n", $url);
-    $file = $pathToImg.basename($url);
+    $file = $pathToImg."non-morphed".basename($url).".jpg";
     exec('cp '.$pathToLZ.$url." ".$file);
     exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
-}
-$images = glob($pathToImg."*.jpg");
-
-printf("Morphed the Images.\n");
-exec("convert $pathToImg*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
-
-$morphs = glob($pathToImg."morph-*.*");
-
-$counter = 0;
-$lastImage = "";
-foreach($morphs as $key=>$morph) {
-    if($key % ($transition*$fps+1) == 0) {
-        printf("Created 30 copies of: %s\n", $morph);
-        for($k=0; $k<$holdFrame*$fps; $k++) {
-            $lastImage = $pathToImg.str_pad($counter, 8, '0', STR_PAD_LEFT).".png";
-            exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
-        }
+    if($url == end($urls)) {
+        exec('cp '.$pathToLZ.$url." ".$file);
+        exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
     }
-    printf("Renamed Image: %s\n", $morph);
-    $lastImage = $pathToImg.str_pad($counter, 8, '0', STR_PAD_LEFT).".png";
-    exec('mv '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
 }
 
 // Downloading and Compositing the profile image
 if($profile_image) {
-        printf("Downloading the agent Image: %s\n", $profile_image);
-            $profile = $pathToImg . basename($profile_image);
-            exec('cp '.$pathToLZ.$profile_image.' '.$profile);
-            exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
+    printf("Downloading the agent Image: %s\n", $profile_image);
+    $profile = $pathToImg . basename($profile_image);
+    exec('cp '.$pathToLZ.$profile_image.' '.$profile);
+    exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
 }
 
 // Creating the Lines
 $lines = "";
 if ($line_1)
-        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+163 '$line_1' ";
+    $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+163 '$line_1' ";
 if ($line_2)
-        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+193 '$line_2' ";
+    $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+193 '$line_2' ";
 if ($line_3)
     $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+223 '$line_3' ";
 $lines = " -pointsize 20 -fill 'rgba(255,255,255,0.55)' -draw 'rectangle 10,10,590,390' -fill 'rgba(0,0,0,0.95)' -gravity center -annotate +0+107 '$property' ".$lines;
-
 // Creating the watermark.png
 exec("convert -size 600x400 xc:'rgba(0,0,0,0)' -pointsize 18 -font Helvetica $lines ".$pathToImg."watermark.png");
+
+// Getting the last Image
+$images = glob($pathToImg."non-morphed*");
+$lastImage = end($images);
+// Creating the last Image
+exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
+exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
+
+// Morphing The images
+printf("Morphed the Images.\n");
+exec("convert $pathToImg*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
+
+// Getting all Morphs
+$morphs = glob($pathToImg."morph-*.*");
+
+// Creating the Morph Sequence
+$counter = 0;
+foreach($morphs as $key=>$morph) {
+    if($key % ($transition*$fps+1) == 0) {
+        printf("Created 30 copies of: %s\n", $morph);
+        for($k=0; $k<$holdFrame*$fps; $k++) {
+            exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
+        }
+        // Morphing the last image for extra $holdframe
+        if($morph == end($morphs)) {
+            for($k=0; $k<$holdFrame*$fps; $k++) {
+                exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
+            }
+        }
+    }
+    printf("Renamed Image: %s\n", $morph);
+    exec('mv '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
+}
 
 // Creating the first Image
 exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."watermark.png -depth 8 ".$pathToImg."00000000.png");
 exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$pathToImg."00000000.png");
-
-// Creating the last Image
-exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
-exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
 
 if($musicUrl) {
     printf("Created Original video with Music: %s\n", $musicUrl);
