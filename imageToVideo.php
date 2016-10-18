@@ -1,7 +1,7 @@
 <?php
 $musicUrl = htmlspecialchars($_POST["musicUrl"]);
 printf("Music: %s\n", $musicUrl);
-$urls = ['/prop0/001.jpg'];// json_decode(htmlspecialchars($_POST["images"]));
+$urls = ['/prop0/001.jpg', '/prop0/002.jpg'];// json_decode(htmlspecialchars($_POST["images"]));
 $profile_image = "/agent400/agent1471642106.jpg";// htmlspecialchars($_POST["profile_image"]);
 $property = '711 E. Windsor Rd, Pasadena, CA 91107 #405 %test';// htmlspecialchars($_POST["property"]);
 printf("Property: %s\n", $property);
@@ -39,8 +39,9 @@ foreach ($urls as $key=>$url) {
 $images = glob($pathToImg."*.jpg");
 
 printf("Morphed the Images.\n");
-exec("convert $pathToImg*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.jpg");
-$morphs = glob($pathToImg."morph-*.jpg");
+exec("convert $pathToImg*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
+
+$morphs = glob($pathToImg."morph-*.*");
 
 $counter = 0;
 $lastImage = "";
@@ -48,15 +49,16 @@ foreach($morphs as $key=>$morph) {
     if($key % ($transition*$fps+1) == 0) {
         printf("Created 30 copies of: %s\n", $morph);
         for($k=0; $k<$holdFrame*$fps; $k++) {
-            exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".jpg");
-            $lastImage = $pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".jpg";
+            $lastImage = $pathToImg.str_pad($counter, 8, '0', STR_PAD_LEFT).".png";
+            exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
         }
     }
     printf("Renamed Image: %s\n", $morph);
-    exec('mv '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".jpg");
-    $lastImage = $pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".jpg";
+    $lastImage = $pathToImg.str_pad($counter, 8, '0', STR_PAD_LEFT).".png";
+    exec('mv '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
 }
 
+// Downloading and Compositing the profile image
 if($profile_image) {
         printf("Downloading the agent Image: %s\n", $profile_image);
             $profile = $pathToImg . basename($profile_image);
@@ -65,9 +67,8 @@ if($profile_image) {
             $firstImage = glob($pathToImg."00000000*");
             exec('convert -size 600x400 -composite '.$firstImage[0].' '.$pathToImg.'profile.png -geometry +240+30 -depth 8 '.$pathToImg.'00000000.png');
 }
-if(basename($firstImage[0]) != "00000000.png") 
-    unlink($pathToImg.basename($firstImage[0]));
 
+// Creating the Lines
 $lines = "";
 if ($line_1)
         $lines .= " -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 100,155,500,185' -fill black -gravity North -annotate +0+163 '$line_1' ";
@@ -76,9 +77,16 @@ if ($line_2)
 if ($line_3)
         $lines .= " -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 100,216,500,245' -fill black -gravity North -annotate +0+223 '$line_3' ";
 $lines .= " -pointsize 20 -fill 'rgba(255,255,255,0.65)' -draw 'rectangle 50,260,550,350' -fill black -gravity center -annotate +0+107 '$property' ";
+
+// Creating the watermark.png
 exec("convert -size 600x400 xc:'rgba(0,0,0,0)' -pointsize 18 -font Helvetica $lines ".$pathToImg."watermark.png");
+
+// Creating the first Image
 exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."watermark.png -depth 8 ".$pathToImg."00000000.png");
 
+// Creating the last Image
+exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
+exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
 
 /*
 printf($lastImage);
@@ -97,13 +105,14 @@ if($line_1 || $line_2 || $line_3) {
 }
  */ 
 // Creating the original OUT video
+
 if($musicUrl) {
     printf("Created Original video with Music: %s\n", $musicUrl);
-    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.* -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
     $retVid = $out.".mp4";
 } else {
     printf("Created Original video without Music.\n");
-    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.jpg -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
     $retVid = $out.".mp4";
 }
 /*
