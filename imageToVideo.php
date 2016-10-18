@@ -32,10 +32,11 @@ if($musicUrl) {
 // Copying the Images
 foreach ($urls as $key=>$url) {
     printf("Downloaded Image: %s\n", $url);
-    $file = $pathToImg."non-morphed".basename($url).".jpg";
+    $file = $pathToImg."non-morphed".basename($url);
     exec('cp '.$pathToLZ.$url." ".$file);
     exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
     if($url == end($urls)) {
+        $file = $pathToImg."z-non-morphed".basename($url);
         exec('cp '.$pathToLZ.$url." ".$file);
         exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
     }
@@ -46,8 +47,7 @@ if($profile_image) {
     printf("Downloading the agent Image: %s\n", $profile_image);
     $profile = $pathToImg . basename($profile_image);
     exec('cp '.$pathToLZ.$profile_image.' '.$profile);
-    exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.jpg');
-    exec('rm -f'.$profile);
+    exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
 }
 
 // Creating the Lines
@@ -63,15 +63,16 @@ $lines = " -pointsize 20 -fill 'rgba(255,255,255,0.55)' -draw 'rectangle 10,10,5
 exec("convert -size 600x400 xc:'rgba(0,0,0,0)' -pointsize 18 -font Helvetica $lines ".$pathToImg."watermark.png");
 
 // Getting the last Image
-$images = glob($pathToImg."non-morphed*");
-$lastImage = end($images);
+$images = glob($pathToImg."z-non-morphed*");
+$lastImage = $images[0];
+printf("Last Image is: %s\n", $lastImage);
 // Creating the last Image
 exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
 exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
 
 // Morphing The images
 printf("Morphed the Images.\n");
-exec("convert $pathToImg*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
+exec("convert $pathToImg*non-morphed*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
 
 // Getting all Morphs
 $morphs = glob($pathToImg."morph-*.*");
@@ -80,15 +81,9 @@ $morphs = glob($pathToImg."morph-*.*");
 $counter = 0;
 foreach($morphs as $key=>$morph) {
     if($key % ($transition*$fps+1) == 0) {
-        printf("Created 30 copies of: %s\n", $morph);
+        printf("Created %d copies of: %s\n", $holdFrame, $morph);
         for($k=0; $k<$holdFrame*$fps; $k++) {
             exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
-        }
-        // Morphing the last image for extra $holdframe
-        if($morph == end($morphs)) {
-            for($k=0; $k<$holdFrame*$fps; $k++) {
-                exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
-            }
         }
     }
     printf("Renamed Image: %s\n", $morph);
@@ -101,11 +96,11 @@ exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."
 
 if($musicUrl) {
     printf("Created Original video with Music: %s\n", $musicUrl);
-    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
     $retVid = $out.".mp4";
 } else {
     printf("Created Original video without Music.\n");
-    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".count($images)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
     $retVid = $out.".mp4";
 }
 
@@ -114,4 +109,5 @@ printf("Deleting the temp folder: %s\n", $pathToImg);
 exec('rm -rf '.$pathToImg);
 
 return $retVid;
+
 ?>
