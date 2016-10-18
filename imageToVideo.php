@@ -46,7 +46,8 @@ if($profile_image) {
     printf("Downloading the agent Image: %s\n", $profile_image);
     $profile = $pathToImg . basename($profile_image);
     exec('cp '.$pathToLZ.$profile_image.' '.$profile);
-    exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
+    exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.jpg');
+    exec('rm -f'.$profile);
 }
 
 // Creating the Lines
