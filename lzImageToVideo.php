@@ -98,7 +98,7 @@ $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 					line_1: "<?= $line_1 ?>",
 					line_2: "<?= $line_2 ?>",
 					line_3: "<?= $line_3 ?>",
-					fps: "<?= $fps/100 ?>"
+					fps: "<?= $fps ?>"
 				};
 				console.log(data)
 

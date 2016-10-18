@@ -8,6 +8,8 @@ $line_2 = htmlspecialchars($_POST["line_2"]);
 $line_3 = htmlspecialchars($_POST["line_3"]);
 $fps = (isset($_POST['framerate'])) ? htmlspecialchars($_POST['framerate']) : 20;
 
+//printf($urls[0]);
+//$urls = ['/prop0/001.jpg'];
 function imageToVideo (array $urls, $property, $fps,
                        $musicUrl = null,
                        $profile_image = null,
@@ -88,7 +90,7 @@ if($profile_image)
     $counter = 0;
     foreach($morphs as $key=>$morph) {
         if($key % ($transition*$fps+1) == 0) {
-            printf("Created %d copies of: %s\n", $holdFrame, $morph);
+            printf("Created %d copies of: %s\n", $holdFrame*$fps, $morph);
             for($k=0; $k<$holdFrame*$fps; $k++) {
                 exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
             }
@@ -114,7 +116,7 @@ if($profile_image)
 
 // Deleting files
     printf("Deleting the temp folder: %s\n", $pathToImg);
-    //exec('rm -rf '.$pathToImg);
+    exec('rm -rf '.$pathToImg);
     return $retVid;
 }
 
