@@ -1,7 +1,7 @@
 <?php
 
 $musicUrl = htmlspecialchars($_GET["musicUrl"]);
-$urls = $_GET["images"];
+$images = $_GET["images"];
 $profile_image = htmlspecialchars($_GET["profile_image"]);
 $property = htmlspecialchars($_GET["property"]);
 $line_1 = htmlspecialchars($_GET["line_1"]);
@@ -9,10 +9,6 @@ $line_2 = htmlspecialchars($_GET["line_2"]);
 $line_3 = htmlspecialchars($_GET["line_3"]);
 $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 
-$images = array();
-foreach ($urls as $key=>$image)
-	$images[$key] = $image;
-echo json_encode($images);
 ?>
 
 <!DOCTYPE HTML>
@@ -94,10 +90,9 @@ echo json_encode($images);
 					window.addEventListener('load', function() { document.body.className = document.body.className.replace(/\bis-loading\b/, ''); });
 					document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
 				}
-
 				var data = {
 					musicUrl: "<?= $musicUrl ?>",
-					urls: "<?php json_encode($images) ?>",
+					urls: <?= json_encode($images, JSON_FORCE_OBJECT) ?>,
 					profile_image: "<?= $profile_image ?>",
 					property: "<?= $property ?>",
 					line_1: "<?= $line_1 ?>",
@@ -106,6 +101,9 @@ echo json_encode($images);
 					fps: "<?= $fps ?>"
 				}
 				console.log(data)
+				$.post('/ffmpeg-image-to-video/imageToVideo.php', data, function(result) {
+					console.log(result)
+				})
 //				$.ajax({
 //					url: '/ffmpeg-image-to-video/imageToVideo.php',
 //					data: data
