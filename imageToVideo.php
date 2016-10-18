@@ -35,6 +35,7 @@ function imageToVideo (array $urls, $property,
     }
 
 // Copying the Images
+<<<<<<< HEAD
     foreach ($urls as $key => $url) {
         printf("Downloaded Image: %s\n", $url);
         $file = $pathToImg . "non-morphed" . basename($url) . ".jpg";
@@ -44,9 +45,21 @@ function imageToVideo (array $urls, $property,
             exec('cp ' . $pathToLZ . $url . " " . $file);
             exec('convert ' . $file . ' -resize 600x400 -background black -gravity center -extent 600x400 ' . $file);
         }
+=======
+foreach ($urls as $key=>$url) {
+    printf("Downloaded Image: %s\n", $url);
+    $file = $pathToImg."non-morphed".basename($url);
+    exec('cp '.$pathToLZ.$url." ".$file);
+    exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
+    if($url == end($urls)) {
+        $file = $pathToImg."z-non-morphed".basename($url);
+        exec('cp '.$pathToLZ.$url." ".$file);
+        exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
     }
 
 // Downloading and Compositing the profile image
+<<<<<<< HEAD
     if ($profile_image) {
         printf("Downloading the agent Image: %s\n", $profile_image);
         $profile = $pathToImg . basename($profile_image);
@@ -54,6 +67,14 @@ function imageToVideo (array $urls, $property,
         exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 ' . $pathToImg . 'profile.jpg');
         exec('rm -f' . $profile);
     }
+=======
+if($profile_image) {
+    printf("Downloading the agent Image: %s\n", $profile_image);
+    $profile = $pathToImg . basename($profile_image);
+    exec('cp '.$pathToLZ.$profile_image.' '.$profile);
+    exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
+}
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
 
 // Creating the Lines
     $lines = "";
@@ -68,20 +89,32 @@ function imageToVideo (array $urls, $property,
     exec("convert -size 600x400 xc:'rgba(0,0,0,0)' -pointsize ".$font." -font Helvetica $lines " . $pathToImg . "watermark.png");
 
 // Getting the last Image
+<<<<<<< HEAD
     $images = glob($pathToImg . "non-morphed*");
     $lastImage = end($images);
+=======
+$images = glob($pathToImg."z-non-morphed*");
+$lastImage = $images[0];
+printf("Last Image is: %s\n", $lastImage);
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
 // Creating the last Image
     exec("convert -size 600x400 -composite " . $lastImage . " " . $pathToImg . "watermark.png -depth 8 " . $lastImage);
     exec("convert -size 600x400 -composite " . $lastImage . " " . $pathToImg . "profile.png -geometry +240+30 -depth 8 " . $lastImage);
 
 // Morphing The images
+<<<<<<< HEAD
     printf("Morphed the Images.\n");
     exec("convert $pathToImg*.jpg -morph " . $transition * $fps . " " . $pathToImg . "morph-%07d.png");
+=======
+printf("Morphed the Images.\n");
+exec("convert $pathToImg*non-morphed*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
 
 // Getting all Morphs
     $morphs = glob($pathToImg . "morph-*.*");
 
 // Creating the Morph Sequence
+<<<<<<< HEAD
     $counter = 0;
     foreach ($morphs as $key => $morph) {
         if ($key % ($transition * $fps + 1) == 0) {
@@ -98,9 +131,19 @@ function imageToVideo (array $urls, $property,
         }
         printf("Renamed Image: %s\n", $morph);
         exec('mv ' . $morph . ' ' . $pathToImg . str_pad($counter++, 8, '0', STR_PAD_LEFT) . ".png");
+=======
+$counter = 0;
+foreach($morphs as $key=>$morph) {
+    if($key % ($transition*$fps+1) == 0) {
+        printf("Created %d copies of: %s\n", $holdFrame, $morph);
+        for($k=0; $k<$holdFrame*$fps; $k++) {
+            exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
+        }
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
     }
 
 // Creating the first Image
+<<<<<<< HEAD
     exec("convert -size 600x400 -composite " . $pathToImg . "00000000.png " . $pathToImg . "watermark.png -depth 8 " . $pathToImg . "00000000.png");
     exec("convert -size 600x400 -composite " . $pathToImg . "00000000.png " . $pathToImg . "profile.png -geometry +240+30 -depth 8 " . $pathToImg . "00000000.png");
 
@@ -113,6 +156,20 @@ function imageToVideo (array $urls, $property,
         exec("ffmpeg -r " . $transition * $fps . " -i " . $pathToImg . "%08d.png -t " . count($images) * ($transition + $holdFrame) . " -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 " . $out . ".mp4");
         $retVid = $out . ".mp4";
     }
+=======
+exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."watermark.png -depth 8 ".$pathToImg."00000000.png");
+exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$pathToImg."00000000.png");
+
+if($musicUrl) {
+    printf("Created Original video with Music: %s\n", $musicUrl);
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    $retVid = $out.".mp4";
+} else {
+    printf("Created Original video without Music.\n");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    $retVid = $out.".mp4";
+}
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
 
 // Deleting files
     printf("Deleting the temp folder: %s\n", $pathToImg);
@@ -121,6 +178,7 @@ function imageToVideo (array $urls, $property,
     return $retVid;
 }
 
+<<<<<<< HEAD
 echo json_encode(array(
     "response" => [
         "status"=>"success",
@@ -128,4 +186,8 @@ echo json_encode(array(
     ],
     "links" => imageToVideo($urls, $property, $fps, $musicUrl, $profile_image, $line_1, $line_2, $line_3)
 ))
+=======
+return $retVid;
+
+>>>>>>> 86cd47f3a32d6347f8e4b9b4052982b4be6b953d
 ?>
