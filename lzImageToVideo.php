@@ -98,17 +98,16 @@ $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 					line_1: "<?= $line_1 ?>",
 					line_2: "<?= $line_2 ?>",
 					line_3: "<?= $line_3 ?>",
-					fps: "<?= $fps ?>"
+					fps: <?= $fps ?>
 				};
 				console.log(data)
 
 				$.post('/images/ffmpeg-image-to-video/imageToVideo.php', data, function(response) {
-                    console.log(response)
-                    var res = $.parseJSON(response)
-                    console.log(response.link)
-                    $("#button").html("<a href='https://shootinglacloud.com/images/ffmpeg-image-to-video/"+response.link+"' class='btn-floating btn-large waves-effect waves-light red' download><i class='material-icons large'>file_download</i></a>")
-                    console.log('images/ffmpeg-image-to-video/'+response.link)
-//                    window.location.href = '/images/ffmpeg-image-to-video/'+response.link
+                    var res = JSON.parse(response)
+                    console.log(res)
+                    $("#button").html("<a href='https://shootinglacloud.com/images/ffmpeg-image-to-video/"+res.link+"' class='btn-floating btn-large waves-effect waves-light red' download><i class='material-icons large'>file_download</i></a>")
+                    console.log('images/ffmpeg-image-to-video/'+res.link)
+//                    window.location.href = '/images/ffmpeg-image-to-video/'+res.link
 				}).error(function(data) {
 					console.log(data)
 				});

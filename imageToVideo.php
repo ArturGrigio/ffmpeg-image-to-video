@@ -7,7 +7,6 @@ $line_1 = htmlspecialchars($_POST["line_1"]);
 $line_2 = htmlspecialchars($_POST["line_2"]);
 $line_3 = htmlspecialchars($_POST["line_3"]);
 $fps = (isset($_POST['framerate'])) ? htmlspecialchars($_POST['framerate']) : 20;
-printf("Images are %s \n", var_dump($urls));
 
 function imageToVideo (array $urls, $property, $fps,
                        $musicUrl = null,
@@ -25,18 +24,18 @@ function imageToVideo (array $urls, $property, $fps,
     $pathToLZ = "/home/shootingla/var/www/html/images/ListingZen";
 
 // Creating the folder
-    printf("Made Folder %s \n", $pathToImg);
+//    printf("Made Folder %s \n", $pathToImg);
     exec('mkdir '.$pathToImg.'/');
 
 // Downloading the Music File
     if($musicUrl) {
-        printf("Downloaded Song: %s\n", $musicUrl);
+//        printf("Downloaded Song: %s\n", $musicUrl);
         exec('wget  -O '.$pathToImg.'/music.mp3 '.$musicUrl);
     }
 
 // Copying the Images
     foreach ($urls as $key=>$url) {
-        printf("Downloaded Image: %s\n", $url);
+//        printf("Downloaded Image: %s\n", $url);
         $file = $pathToImg."non-morphed".basename($url);
         exec('cp '.$pathToLZ.$url." ".$file);
         exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
@@ -49,7 +48,7 @@ function imageToVideo (array $urls, $property, $fps,
 
 // Downloading and Compositing the profile image
     if($profile_image) {
-        printf("Downloading the agent Image: %s\n", $profile_image);
+//        printf("Downloading the agent Image: %s\n", $profile_image);
         $profile = $pathToImg . basename($profile_image);
         exec('cp '.$pathToLZ.$profile_image.' '.$profile);
         exec('convert ' . $profile . ' -resize 120x120 -background none -gravity center -extent 120x120 '.$pathToImg.'profile.png');
@@ -71,7 +70,7 @@ function imageToVideo (array $urls, $property, $fps,
 // Getting the last Image
     $images = glob($pathToImg."z-non-morphed*");
     $lastImage = $images[0];
-    printf("Last Image is: %s\n", $lastImage);
+//    printf("Last Image is: %s\n", $lastImage);
 
 // Creating the last Image
     exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."watermark.png -depth 8 ".$lastImage);
@@ -79,7 +78,7 @@ if($profile_image)
     exec("convert -size 600x400 -composite ".$lastImage." ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$lastImage);
 
 // Morphing The images
-    printf("Morphed the Images.\n");
+//    printf("Morphed the Images.\n");
     exec("convert $pathToImg*non-morphed*.jpg -morph ".$transition*$fps." ".$pathToImg."morph-%07d.png");
 
 // Getting all Morphs
@@ -89,12 +88,12 @@ if($profile_image)
     $counter = 0;
     foreach($morphs as $key=>$morph) {
         if($key % ($transition*$fps+1) == 0) {
-            printf("Created %d copies of: %s\n", $holdFrame*$fps, $morph);
+//            printf("Created %d copies of: %s\n", $holdFrame*$fps, $morph);
             for($k=0; $k<$holdFrame*$fps; $k++) {
                 exec('cp '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
             }
         }
-        printf("Renamed Image: %s\n", $morph);
+//        printf("Renamed Image: %s\n", $morph);
         exec('mv '.$morph.' '.$pathToImg.str_pad($counter++, 8, '0', STR_PAD_LEFT).".png");
     }
 
@@ -103,27 +102,30 @@ if($profile_image)
 if($profile_image)
     exec("convert -size 600x400 -composite ".$pathToImg."00000000.png ".$pathToImg."profile.png -geometry +240+30 -depth 8 ".$pathToImg."00000000.png");
 
-    if($musicUrl) {
-        printf("Created Original video with Music: %s\n", $musicUrl);
-        exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
-        $retVid = $out.".mp4";
-    } else {
-        printf("Created Original video without Music.\n");
-        exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".count($morphs)*($transition+$holdFrame)." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
-        $retVid = $out.".mp4";
-    }
+// Calculating -t
+$time = (count($urls)+1)*($transition+$holdFrame);
+
+if($musicUrl) {
+//        printf("Created Original video with Music: %s\n", $musicUrl);
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".$time." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    $retVid = $out.".mp4";
+} else {
+//        printf("Created Original video without Music.\n");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".$time." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    $retVid = $out.".mp4";
+}
 
 // Deleting files
-    printf("Deleting the temp folder: %s\n", $pathToImg);
+//    printf("Deleting the temp folder: %s\n", $pathToImg);
     exec('rm -rf '.$pathToImg);
     return $retVid;
 }
 
 echo json_encode(array(
-    "response" => [
-        "status"=>"success",
-        "message"=>"video_created"
-    ],
-    "link" => imageToVideo($urls, $property, $fps, $musicUrl, $profile_image, $line_1, $line_2, $line_3)
+        "response" => [
+            "status"=>"success",
+            "message"=>"video_created"
+        ],
+        "link" => imageToVideo($urls, $property, $fps, $musicUrl, $profile_image, $line_1, $line_2, $line_3)
 ))
 ?>
