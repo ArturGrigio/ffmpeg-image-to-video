@@ -57,12 +57,12 @@ function imageToVideo (array $urls, $property, $fps,
 // Creating the Lines
     $lines = "";
     if ($line_1)
-        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+163 '$line_1' ";
+        $lines .= " -pointsize ".$font." -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+163 '$line_1' ";
     if ($line_2)
-        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+193 '$line_2' ";
+        $lines .= " -pointsize ".$font." -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+193 '$line_2' ";
     if ($line_3)
-        $lines .= " -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+223 '$line_3' ";
-    $lines = " -pointsize 20 -fill 'rgba(255,255,255,0.55)' -draw 'rectangle 10,10,590,390' -fill 'rgba(0,0,0,0.95)' -gravity center -annotate +0+107 '$property' ".$lines;
+        $lines .= " -pointsize ".$font." -fill 'rgba(0,0,0,0.95)' -gravity North -annotate +0+223 '$line_3' ";
+    $lines = " -pointsize ".ceil($font*1.3)." -fill 'rgba(255,255,255,0.55)' -draw 'rectangle 10,10,590,390' -fill 'rgba(0,0,0,0.95)' -gravity center -annotate +0+107 '$property' ".$lines;
 
 // Creating the watermark.png
     exec("convert -size 600x400 xc:'rgba(0,0,0,0)' -pointsize 18 -font Helvetica $lines ".$pathToImg."watermark.png");
