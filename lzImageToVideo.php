@@ -53,8 +53,7 @@ $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 						<header>
 							<span class="avatar" id="button">
                                 <div class="thin" style="color:#c7c7c7; font-size: 12px;">
-                                    CREATING VIDEO... <br />
-                                    YOUR VIDEO WILL START DOWNLOADING WHEN COMPLETED.
+                                    CREATING THE VIDEO... <br />
                                 </div>
 								<div class="preloader-wrapper active">
 									<div class="spinner-layer spinner-red-only">
