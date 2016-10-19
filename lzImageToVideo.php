@@ -103,9 +103,12 @@ $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 				console.log(data)
 
 				$.post('/images/ffmpeg-image-to-video/imageToVideo.php', data, function(response) {
-					console.log(response)
-					$("#button").html("<a href='https://shootinglacloud.com/images/ffmpeg-image-to-video/"+response.link+"' class='btn-floating btn-large waves-effect waves-light red' download><i class='material-icons large'>file_download</i></a>")
-					window.location.href = '/images/ffmpeg-image-to-video/'+response.link
+                    console.log(response)
+                    var res = $.parseJSON(response)
+                    console.log(response.link)
+                    $("#button").html("<a href='https://shootinglacloud.com/images/ffmpeg-image-to-video/"+response.link+"' class='btn-floating btn-large waves-effect waves-light red' download><i class='material-icons large'>file_download</i></a>")
+                    console.log('images/ffmpeg-image-to-video/'+response.link)
+//                    window.location.href = '/images/ffmpeg-image-to-video/'+response.link
 				}).error(function(data) {
 					console.log(data)
 				});
