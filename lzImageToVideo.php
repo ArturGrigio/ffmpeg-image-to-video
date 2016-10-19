@@ -8,7 +8,7 @@ $line_1 = htmlspecialchars($_GET["line_1"]);
 $line_2 = htmlspecialchars($_GET["line_2"]);
 $line_3 = htmlspecialchars($_GET["line_3"]);
 $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
-var_dump($images);
+
 ?>
 
 <!DOCTYPE HTML>
