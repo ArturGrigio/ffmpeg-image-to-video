@@ -8,7 +8,7 @@ $line_1 = htmlspecialchars($_GET["line_1"]);
 $line_2 = htmlspecialchars($_GET["line_2"]);
 $line_3 = htmlspecialchars($_GET["line_3"]);
 $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
-
+var_dump($images);
 ?>
 
 <!DOCTYPE HTML>
@@ -102,25 +102,14 @@ $fps = htmlspecialchars($_GET['framerate'])/100; // Frames per second
 				};
 				console.log(data)
 
-				$.post('/images/ffmpeg-image-to-video/imageToVideo.php', data, function(result) {
-					console.log(result)
-					var response = JSON.parse(response)
+				$.post('/images/ffmpeg-image-to-video/imageToVideo.php', data, function(response) {
 					console.log(response)
+					$("#button").html("<a href='https://shootinglacloud.com/images/ffmpeg-image-to-video/"+response.link+"' class='btn-floating btn-large waves-effect waves-light red' download><i class='material-icons large'>file_download</i></a>")
+					window.location.href = '/images/ffmpeg-image-to-video/'+response.link
 				}).error(function(data) {
 					console.log(data)
 				});
-//				$.ajax({
-//					url: '/ffmpeg-image-to-video/imageToVideo.php',
-//					data: data
-//					type: 'POST',
-//				}).done(function(data){
-//					console.log(data)
-//					var response = JSON.parse(data)
-//					$("#button").html("<a href='https://shootinglacloud.com/images/ffmpeg-image-to-video/"+response.links+"' class='btn-floating btn-large waves-effect waves-light red' download><i class='material-icons large'>file_download</i></a>")
-//					window.location.href = '/ffmpeg-image-to-video/'+data.links
-//				}).error(function(data) {
-//					console.log(data)
-//				});
+
 
 			</script>
 	</body>

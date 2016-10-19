@@ -1,15 +1,14 @@
 <?php
 $musicUrl = (isset($_POST['musicUrl'])) ? htmlspecialchars($_POST["musicUrl"]) : null;
-$urls = json_decode(htmlspecialchars($_POST["urls"]));
+$urls = $_POST["urls"];
 $profile_image = (isset($_POST['profile_image'])) ? htmlspecialchars($_POST["profile_image"]) : null;
 $property = (isset($_POST['property'])) ? htmlspecialchars($_POST["property"]) : "ListingZen Property";
 $line_1 = htmlspecialchars($_POST["line_1"]);
 $line_2 = htmlspecialchars($_POST["line_2"]);
 $line_3 = htmlspecialchars($_POST["line_3"]);
 $fps = (isset($_POST['framerate'])) ? htmlspecialchars($_POST['framerate']) : 20;
+printf("Images are %s \n", var_dump($urls));
 
-//printf($urls[0]);
-//$urls = ['/prop0/001.jpg'];
 function imageToVideo (array $urls, $property, $fps,
                        $musicUrl = null,
                        $profile_image = null,
