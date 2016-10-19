@@ -107,11 +107,11 @@ $time = (count($urls)+1)*($transition+$holdFrame);
 
 if($musicUrl) {
 //        printf("Created Original video with Music: %s\n", $musicUrl);
-    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".$time." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -i ".$pathToImg."music.mp3 -t ".$time." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 -metadata author='ListingZen LLC.' ".$out.".mp4");
     $retVid = $out.".mp4";
 } else {
 //        printf("Created Original video without Music.\n");
-    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".$time." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 ".$out.".mp4");
+    exec("ffmpeg -r ".$transition*$fps." -i ".$pathToImg."%08d.png -t ".$time." -vf scale=600:400 -pix_fmt yuv420p -vcodec libx264 -strict -2 -metadata author='ListingZen LLC.' ".$out.".mp4");
     $retVid = $out.".mp4";
 }
 
