@@ -36,11 +36,11 @@ function imageToVideo (array $urls, $property, $fps,
 // Copying the Images
     foreach ($urls as $key=>$url) {
 //        printf("Downloaded Image: %s\n", $url);
-        $file = $pathToImg."non-morphed".basename($url);
+        $file = $pathToImg."non-morphed".$key.basename($url);
         exec('cp '.$pathToLZ.$url." ".$file);
         exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
         if($url == end($urls)) {
-            $file = $pathToImg."z-non-morphed".basename($url);
+            $file = $pathToImg."z-non-morphed".($key+1).basename($url);
             exec('cp '.$pathToLZ.$url." ".$file);
             exec('convert '.$file.' -resize 600x400 -background black -gravity center -extent 600x400 '.$file);
         }
