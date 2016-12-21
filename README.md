@@ -4,7 +4,7 @@ Image (jpegs) to Video (mp4) converter using FFMPEG, with audio and watermarks
 
 This library allows you to `GET` the `lzImageToVideo` with:
 The `GET` request values are:
- - `urls` [array] (required)
+ - `urls` [array] - [required]
  - `musicUrl` [string]
  - `profile_image` [string]
  - `framerate` [int]
